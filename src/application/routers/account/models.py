@@ -1,3 +1,5 @@
+import datetime
+
 from pydantic import EmailStr, validator
 
 from src.ext import CamelModel
@@ -27,6 +29,7 @@ class AccountOut(CamelModel):
     email: str
     token: str
     is_admin: bool
+    exp: datetime.datetime
 
 
 class AdminUpdateIn(CamelModel):

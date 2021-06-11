@@ -1,3 +1,4 @@
+import datetime
 from base64 import b64decode
 from pathlib import Path
 from typing import Optional, TypedDict
@@ -25,6 +26,7 @@ class AuthHandler:
             self._secret = f.read()
 
     def encode_payload(self, payload: dict):
+        payload['exp'] = datetime.datetime.now() + datetime.timedelta(days=1)
         token = jwt.encode(payload, self._secret, algorithm=self._algorithm)
         return {**payload, "token": token}
 
