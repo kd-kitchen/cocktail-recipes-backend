@@ -1,3 +1,4 @@
+import datetime
 import random
 import string
 from typing import Optional
@@ -31,15 +32,16 @@ class IngredientsRepo:
 
         return Ingredient(**res) if res is not None else None
 
-    # async def add_account(self, username: str, password: str, email: str) -> Account:
-    #     username, password = self._format_inputs(username, password)
-    #     id: int = await db.execute("""
-    #     INSERT INTO account.account (username, password, email, is_admin)
-    #     VALUES (:username, :password, :email, FALSE)
-    #     RETURNING id
-    #     """, {"username": username, "password": password, "email": email})
-    #
-    #     return Account(id, username, password, email, False)
+    async def add_ingredient(self, iname: str, creator_id: int, description: str) -> Ingredient:
+        iname = iname.lower()
+        creation_date = str(datetime.datetime.now())
+        iid: int = await db.execute("""
+        INSERT INTO ingredient.ingredient (iname, creator_id, creation_date, description)
+        VALUES (:iname, :creator_id, :creation_date, :description)
+        RETURNING iid
+        """, {"iname": str, "creator_id": int, "creation_date": str, "description": str})
+
+        return Ingredient (iid, iname, creator_id, creation_date, description)
     #
     # async def update_account(self, id: int, username: str, password: str, email: str) -> Optional[Account]:
     #     if await self.fetch_account_by_id(id) is None:
@@ -77,3 +79,11 @@ class IngredientsRepo:
     #     return username, password
     #
     # validate = staticmethod(validate)
+
+    @staticmethod
+    def _format_inputs(name: str, creation_date: datetime.datetime):
+        name = name.lower()
+        creation_date = datetime.datetime.now()
+
+        return name, creation_date
+

@@ -7,9 +7,9 @@ __all__ = ['Ingredient']
 @dataclass
 class Ingredient:
     iid: int
-    name: str
-    creator_id: str
-    creation_date: datetime.datetime
+    iname: str
+    creator_id: int
+    creation_date: str
     last_updated: datetime.datetime
     description: str
     # tags: []
