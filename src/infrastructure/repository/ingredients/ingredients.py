@@ -10,15 +10,23 @@ __all__ = ['IngredientsRepo']
 
 
 class IngredientsRepo:
+    @staticmethod
+    async def fetch_all_ingredients():
+        results = await db.fetch_all("""
+        select id, name, description
+        FROM recipe.ingredient
+        """)
+
+        return [Ingredient(**r) for r in results]
 
     @staticmethod
-    async def fetch_ingredient_by_iid(iid: int) -> Optional[Ingredient]:
+    async def fetch_ingredient_by_iid(id: int) -> Optional[Ingredient]:
         """Always returns ingredient based on ingredient id (iid) upon request"""
         res = await db.fetch_one("""
         SELECT *
-        FROM ingredient.ingredient
-        WHERE iid = :iid
-        """, {'iid': iid})
+        FROM recipe.ingredient
+        WHERE id = :id
+        """, {'id': id})
 
         return Ingredient(**res) if res is not None else None
 
@@ -26,22 +34,23 @@ class IngredientsRepo:
     async def fetch_ingredient_by_name(name: str) -> Optional[Ingredient]:
         res = await db.fetch_all("""
         SELECT *
-        FROM ingredient.ingredient
+        FROM recipe.ingredient
         WHERE (name OR description) SIMILAR TO name
-        """, {'id': id})
+        """, {'name': name})
 
         return Ingredient(**res) if res is not None else None
 
-    async def add_ingredient(self, iname: str, creator_id: int, description: str) -> Ingredient:
-        iname = iname.lower()
-        creation_date = str(datetime.datetime.now())
-        iid: int = await db.execute("""
-        INSERT INTO ingredient.ingredient (iname, creator_id, creation_date, description)
-        VALUES (:iname, :creator_id, :creation_date, :description)
-        RETURNING iid
-        """, {"iname": str, "creator_id": int, "creation_date": str, "description": str})
+    async def add_ingredient(self, name: str, description: str) -> Ingredient:
+        name = self._format_inputs(name)
+        description = description
+        id = await db.execute("""
+        INSERT INTO recipe.ingredient (name, description)
+        VALUES (:name, :description)
+        RETURNING id
+        """, {"name": name, "description": description})
 
-        return Ingredient (iid, iname, creator_id, creation_date, description)
+        return Ingredient(id, name, description)
+
     #
     # async def update_account(self, id: int, username: str, password: str, email: str) -> Optional[Account]:
     #     if await self.fetch_account_by_id(id) is None:
@@ -81,9 +90,7 @@ class IngredientsRepo:
     # validate = staticmethod(validate)
 
     @staticmethod
-    def _format_inputs(name: str, creation_date: datetime.datetime):
-        name = name.lower()
-        creation_date = datetime.datetime.now()
+    def _format_inputs(nae: str):
+        nae = nae.lower()
 
-        return name, creation_date
-
+        return nae

@@ -1,9 +1,10 @@
 from importlib import import_module
 from pathlib import Path
 from pkgutil import iter_modules
-
+import os
 from asyncpg.exceptions import PostgresError
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
 from src.application.seeds import seed_database
@@ -14,6 +15,7 @@ from src.utils import project_root
 def build_app():
     return (AppBuilder()
             .add_api_routes()
+            .add_static_drive()
             .add_error_handlers()
             .add_events()
             .add_healthcheck()
@@ -63,6 +65,18 @@ class AppBuilder:
         def healthcheck():
             return JSONResponse({"status": "Okay"})
 
+        return self
+
+    def add_static_drive(self):
+        app_env = os.environ.get('APP_ENV', 'development').lower()
+        if app_env == 'development':
+            directory = Path(__file__).parents[2] / 'images'
+        elif app_env == 'production':
+            raise NotImplementedError
+        else:
+            raise KeyError(f'invalid APP_ENV: {app_env}')
+
+        self._app.mount("/images", StaticFiles(directory=directory), name='images')
         return self
 
     def create_app(self):

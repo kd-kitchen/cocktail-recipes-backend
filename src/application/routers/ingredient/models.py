@@ -1,16 +1,13 @@
-import datetime
-
-from pydantic import EmailStr, validator
+from pydantic import validator
 
 from src.ext import CamelModel
 
 
 class IngredientCreateIn(CamelModel):
-    iname: str
-    creator_id: int
+    name: str
     description: str
 
-    @validator('iname')
+    @validator('name')
     def name_not_empty(cls, v: str):
         v = v.strip().lower()
         if len(v) == 0:
@@ -20,19 +17,11 @@ class IngredientCreateIn(CamelModel):
     @validator('description')
     def description_not_empty(cls, v: str):
         if len(v) == 0:
-            raise ValueError("Describe what the ingredient is!")
+            raise ValueError("Describe the shape size or color of your ingredient!")
         return v
 
 
 class IngredientOut(CamelModel):
-    iid: int
-    iname: str
-    creator_id: int
-    creation_date: datetime.datetime
-    last_updated: datetime.datetime
+    id: int
+    name: str
     description: str
-
-
-# class AdminUpdateIn(CamelModel):
-#     id: int
-#     is_admin: bool
